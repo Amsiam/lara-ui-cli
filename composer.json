@@ -1,7 +1,14 @@
 {
     "name": "amsiam/lara-ui-cli",
     "description": "CLI tool for installing LaraUI components in Laravel projects",
-    "keywords": ["laravel", "blade", "ui", "components", "cli", "installer"],
+    "keywords": [
+        "laravel",
+        "blade",
+        "ui",
+        "components",
+        "cli",
+        "installer"
+    ],
     "type": "library",
     "require": {
         "php": "^8.2",
@@ -33,7 +40,7 @@
             "email": "amsiam990@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "sort-packages": true
