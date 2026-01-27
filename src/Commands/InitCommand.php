@@ -142,12 +142,45 @@ class InitCommand extends Command
                 // Update app.css
                 $this->updateAppCss();
 
+                $this->updateComponentNameSpace();
+
                 return true;
             } catch (\Exception $e) {
                 $this->components->error($e->getMessage());
                 return false;
             }
         });
+    }
+
+    protected function updateComponentNameSpace(): void
+    {
+        $prefix = $this->registry->getConfig('prefix', 'ui');
+        $appServiceProviderPath = app_path('Providers/AppServiceProvider.php');
+
+        if (!$this->files->exists($appServiceProviderPath)) {
+            return;
+        }
+
+        $content = $this->files->get($appServiceProviderPath);
+        $namespaceLine = "Blade::componentNamespace('App\\\\View\\\\Components\\\\LaraUi', '{$prefix}');";
+
+        if (str_contains($content, 'Blade::componentNamespace') && !str_contains($content, $namespaceLine)) {
+            // Replace existing namespace line
+            $content = preg_replace(
+                "/Blade::componentNamespace\('App\\\\\\\\View\\\\\\\\Components\\\\\\\\LaraUi', '.*?'\);/",
+                $namespaceLine,
+                $content
+            );
+        } elseif (!str_contains($content, 'Blade::componentNamespace')) {
+            // Add new namespace line in boot method
+            $content = preg_replace(
+                "/public function boot\(\): void\n\s*{/",
+                "public function boot(): void\n    {\n        {$namespaceLine}",
+                $content
+            );
+        }
+
+        $this->files->put($appServiceProviderPath, $content);
     }
 
     protected function updateAppCss(): void

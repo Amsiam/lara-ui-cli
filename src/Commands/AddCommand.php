@@ -204,7 +204,6 @@ class AddCommand extends Command
                 '<fg=green>✓ Installed</>'
             );
             return 'installed';
-
         } catch (\Exception $e) {
             $this->components->twoColumnDetail(
                 "<fg=red>{$component['name']}</>",
@@ -266,7 +265,14 @@ class AddCommand extends Command
 
         // Update view references
         $prefix = $this->registry->getConfig('prefix', 'ui');
-        $content = str_replace("'lu::", "'{$prefix}::", $content);
+        $resourcePath = $this->registry->getConfig('aliases.components', 'resources/views/components/ui');
+
+        $actualPath = str_replace('resources/views/', '', $resourcePath);
+
+        //replace / with .
+        $actualPath = str_replace('/', '.', $actualPath);
+
+        $content = str_replace("'lu::components.", "'{$actualPath}.", $content);
 
         return $content;
     }

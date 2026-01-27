@@ -13,7 +13,7 @@ class ComponentRegistry
     protected ?array $manifest = null;
 
     // Default registry URL - can be overridden in config
-    public const DEFAULT_REGISTRY = config("lara-ui.registry", "https://raw.githubusercontent.com/amsiam/lara-ui/main");
+    public const DEFAULT_REGISTRY = "https://raw.githubusercontent.com/amsiam/lara-ui/main";
     public const MANIFEST_FILE = 'registry.json';
     public const CACHE_TTL = 3600; // 1 hour
 
@@ -21,7 +21,7 @@ class ComponentRegistry
     {
         $this->client = new Client([
             'timeout' => 30,
-            'verify' => true,
+            'verify' => false,
         ]);
 
         $this->config = $this->loadConfig();
