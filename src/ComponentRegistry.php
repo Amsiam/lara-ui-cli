@@ -180,8 +180,7 @@ class ComponentRegistry
     public function getInstalledComponents(): array
     {
         $installed = [];
-        $componentsPath = base_path($this->getConfig('aliases.utils', 'app/View/Components') . '/LaraUi');
-        $viewsPath = base_path($this->getConfig('aliases.components', 'resources/views/components/ui'));
+        $componentsPath = base_path($this->getConfig('aliases.utils', 'app/View/Components/LaraUi'));
 
         foreach ($this->getComponents() as $name => $component) {
             $phpFile = $component['files']['php'][0] ?? null;

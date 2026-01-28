@@ -7,14 +7,14 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 
 use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
 class InitCommand extends Command
 {
     protected $signature = 'ui:init
                             {--force : Overwrite existing configuration}
-                            {--yes : Skip confirmation prompts}';
+                            {--yes : Skip confirmation prompts}
+                            {--registry= : Custom registry URL (default: GitHub)}';
 
     protected $description = 'Initialize LaraUI in your Laravel project';
 
@@ -66,8 +66,11 @@ class InitCommand extends Command
 
     protected function gatherConfig(): array
     {
+        // Get registry from option or use default
+        $registryOption = $this->option('registry');
+
         if ($this->option('yes')) {
-            return $this->getDefaultConfig();
+            return $this->getDefaultConfig($registryOption ?: ComponentRegistry::DEFAULT_REGISTRY);
         }
 
         $this->line('  <fg=blue>Configuration</>');
@@ -101,6 +104,13 @@ class InitCommand extends Command
             hint: 'Used when referencing components in Blade'
         );
 
+        // Registry URL
+        $registry = text(
+            label: 'Component registry URL',
+            default: $registryOption ?: ComponentRegistry::DEFAULT_REGISTRY,
+            hint: 'Leave default for official LaraUI registry, or use custom URL'
+        );
+
         return [
             'aliases' => [
                 'components' => $componentsPath,
@@ -110,11 +120,11 @@ class InitCommand extends Command
                 'css' => $cssPath,
             ],
             'prefix' => $prefix,
-            'registry' => ComponentRegistry::DEFAULT_REGISTRY,
+            'registry' => $registry,
         ];
     }
 
-    protected function getDefaultConfig(): array
+    protected function getDefaultConfig(?string $registry = null): array
     {
         return [
             'aliases' => [
@@ -125,7 +135,7 @@ class InitCommand extends Command
                 'css' => 'resources/css/app.css',
             ],
             'prefix' => 'ui',
-            'registry' => ComponentRegistry::DEFAULT_REGISTRY,
+            'registry' => $registry ?: ComponentRegistry::DEFAULT_REGISTRY,
         ];
     }
 
@@ -162,7 +172,18 @@ class InitCommand extends Command
         }
 
         $content = $this->files->get($appServiceProviderPath);
+        $bladeImport = "use Illuminate\\Support\\Facades\\Blade;";
         $namespaceLine = "Blade::componentNamespace('App\\\\View\\\\Components\\\\LaraUi', '{$prefix}');";
+
+        // Add Blade import if not present
+        if (!str_contains($content, 'use Illuminate\\Support\\Facades\\Blade')) {
+            // Add after namespace declaration
+            $content = preg_replace(
+                '/(namespace App\\\\Providers;)/',
+                "$1\n\n{$bladeImport}",
+                $content
+            );
+        }
 
         if (str_contains($content, 'Blade::componentNamespace') && !str_contains($content, $namespaceLine)) {
             // Replace existing namespace line

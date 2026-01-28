@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;
-use function Laravel\Prompts\spin;
 
 class AddCommand extends Command
 {
@@ -41,6 +40,10 @@ class AddCommand extends Command
         }
 
         $this->setupPaths();
+
+        // Show registry being used
+        $registryUrl = $this->registry->getRegistryUrl();
+        $this->components->info('Using registry: ' . $registryUrl);
 
         // Get components to install
         $components = $this->getComponentsToInstall();
@@ -218,7 +221,10 @@ class AddCommand extends Command
         $destPath = "{$this->componentsPath}/{$file}";
 
         if ($this->files->exists($destPath) && !$this->option('force')) {
-            return false;
+            // Ask user if they want to override
+            if (!confirm("File '{$file}' already exists. Override?", false)) {
+                return false;
+            }
         }
 
         // Fetch from registry
@@ -238,7 +244,10 @@ class AddCommand extends Command
         $destPath = "{$this->viewsPath}/{$file}";
 
         if ($this->files->exists($destPath) && !$this->option('force')) {
-            return false;
+            // Ask user if they want to override
+            if (!confirm("File '{$file}' already exists. Override?", false)) {
+                return false;
+            }
         }
 
         // Fetch from registry
@@ -264,12 +273,8 @@ class AddCommand extends Command
         );
 
         // Update view references
-        $prefix = $this->registry->getConfig('prefix', 'ui');
         $resourcePath = $this->registry->getConfig('aliases.components', 'resources/views/components/ui');
-
         $actualPath = str_replace('resources/views/', '', $resourcePath);
-
-        //replace / with .
         $actualPath = str_replace('/', '.', $actualPath);
 
         $content = str_replace("'lu::components.", "'{$actualPath}.", $content);

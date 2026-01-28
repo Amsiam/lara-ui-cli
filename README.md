@@ -56,13 +56,30 @@ php artisan ui:add
 Initialize LaraUI in your project.
 
 ```bash
-php artisan ui:init [--force] [--yes]
+php artisan ui:init [--force] [--yes] [--registry=]
 ```
 
 | Option | Description |
 |--------|-------------|
 | `--force` | Overwrite existing configuration |
 | `--yes` | Skip prompts, use defaults |
+| `--registry=` | Custom registry URL (default: GitHub) |
+
+**Examples:**
+
+```bash
+# Default initialization (uses official LaraUI registry)
+php artisan ui:init
+
+# Use custom registry
+php artisan ui:init --registry=https://your-domain.com/components
+
+# Quick setup with defaults
+php artisan ui:init --yes
+
+# Custom registry with defaults
+php artisan ui:init --yes --registry=http://localhost:8000/packages/laraui
+```
 
 ### `ui:add`
 
